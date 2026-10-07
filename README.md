@@ -1,16 +1,84 @@
-# React + Vite
+# SoleTrack
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+SoleTrack is a sneaker resale valuation platform. It helps resellers see what a pair is worth, where the price is heading, and whether to hold or sell, then tracks their portfolio and realized profit over time.
 
-Currently, two official plugins are available:
+Live app: https://soletrack-frontend.vercel.app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Backend repo: https://github.com/oju3/Resell-Value-Project
 
-## React Compiler
+## What it does
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Search** the sneaker catalog by name or style code.
+- **Valuation** for each pair, with a price comparison across platforms.
+- **Projection** of where the price is likely heading, shown on a chart.
+- **HOLD / SELL recommendation** based on the projection and platform fees.
+- **Portfolio** of pairs you own, with unrealized profit and loss against what you paid.
+- **Mark as sold** to record the sale platform, price, and date.
+- **Sales history** with realized profit and loss, net of platform fees. Figures are frozen at sale time, so later fee changes do not rewrite history.
+- **Accounts** with email and password sign-in.
 
-## Expanding the Oxlint configuration
+Valuations and recommendations are estimates, not financial advice.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## How it works
+
+This repo is the frontend. It is a React single-page app that talks to a FastAPI backend over a REST API. Sign-in is handled by Supabase Auth, and the frontend sends the user's token with each request so every user only sees their own portfolio and sales.
+
+The data pipeline, projection engine, and HOLD/SELL logic live in the backend repo.
+
+```
+Browser (React, Vercel)  ->  FastAPI API (Render)  ->  Postgres (Supabase)
+            \__________ Supabase Auth (JWT) __________/
+```
+
+## Tech stack
+
+- React and Vite
+- Tailwind CSS v4 and shadcn/ui
+- React Router
+- Recharts for charts
+- Motion for animation
+- Lucide for icons
+
+Hosting: Vercel (frontend), Render (backend), Supabase (database and auth).
+
+## Run it locally
+
+You need Node.js and a running copy of the backend (see the backend repo).
+
+```
+npm install
+```
+
+Create a `.env` file in the project root:
+
+```
+VITE_API_URL=http://127.0.0.1:8000
+VITE_SUPABASE_URL=your-supabase-project-url
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+Then start the dev server:
+
+```
+npm run dev
+```
+
+The app runs at http://localhost:5173.
+
+## Project structure
+
+```
+src/
+  api.js          API base URL and session-expiry handling
+  main.jsx        Routes
+  Hub.jsx         Home screen
+  App.jsx         Sneaker search
+  SneakerDetail.jsx   Valuation, chart, and recommendation
+  Portfolio.jsx   Owned pairs and mark-as-sold flow
+  AddPair.jsx     Add a pair to the portfolio
+  SalesHistory.jsx    Sold pairs and realized profit and loss
+```
+
+## Notes
+
+The backend runs on a free tier, so the first request after a quiet period can take up to a minute while it wakes up.
